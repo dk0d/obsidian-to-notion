@@ -84,6 +84,8 @@ export default class ObsidianSyncNotionPlugin extends Plugin {
 
 
 				if (markDownData) {
+					new Notice(`${langConfig["sync-start"]}`)
+
 					const { basename } = nowFile;
 					const upload = new Upload2Notion(this);
 					const res = await upload.syncMarkdownToNotion(basename, allowTags, tags, markDownData, nowFile, this.app, this.settings)
@@ -98,7 +100,7 @@ export default class ObsidianSyncNotionPlugin extends Plugin {
 	async getNowFileMarkdownContent(app: App) {
 		const nowFile = app.workspace.getActiveFile();
 		const { allowTags } = this.settings;
-		let tags = []
+		let tags;
 		try {
 			if(allowTags) {
 				tags = app.metadataCache.getFileCache(nowFile).frontmatter.tags;
@@ -106,6 +108,11 @@ export default class ObsidianSyncNotionPlugin extends Plugin {
 		} catch (error) {
 			new Notice(langConfig["set-tags-fail"]);
 		}
+		
+		if (allowTags && tags === undefined) {
+			new Notice(langConfig["set-tags-fail"]);
+		}
+
 		if (nowFile) {
 			const markDownData = await nowFile.vault.read(nowFile);
 			return {
